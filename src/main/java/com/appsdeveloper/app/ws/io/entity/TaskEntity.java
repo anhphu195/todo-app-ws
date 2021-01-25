@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 
 @Data
 @Entity(name = "tasks")
@@ -16,6 +17,9 @@ public class TaskEntity implements Serializable {
 
     @Column(nullable = false, length = 30)
     private String taskId;
+
+    @Column(nullable = false, length = 1000)
+    private Date date;
 
     @Column(nullable = false, length = 1000)
     private String taskContent;

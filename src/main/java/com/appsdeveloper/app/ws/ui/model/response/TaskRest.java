@@ -1,22 +1,12 @@
 package com.appsdeveloper.app.ws.ui.model.response;
 
+import lombok.Data;
+
+import java.util.Date;
+
+@Data
 public class TaskRest {
     private String taskId;
+    private Date date;
     private String taskContent;
-
-    public String getTaskId() {
-        return taskId;
-    }
-
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
-    }
-
-    public String getTaskContent() {
-        return taskContent;
-    }
-
-    public void setTaskContent(String taskContent) {
-        this.taskContent = taskContent;
-    }
 }

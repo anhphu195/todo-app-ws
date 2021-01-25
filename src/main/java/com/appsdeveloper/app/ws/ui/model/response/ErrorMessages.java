@@ -9,7 +9,9 @@ public enum ErrorMessages {
     COULD_NOT_UPDATE_RECORD("Could not update record"),
     COULD_NOT_DELETE_RECORD("Could not delete record"),
     EMAIL_ADDRESS_NOT_VERIFIED("Email address could not be verified"),
-    NO_FOUND_USER("User dont exist");
+    NO_FOUND_USER("User dont exist"),
+    NO_FOUND_TASK("Task dont exist"),
+    USER_DONT_HAVE_THIS_TASK("This user dont have this task");
 
 
     private String errorMessage;

@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TaskRepository extends PagingAndSortingRepository<TaskEntity,Long> {
     Page<TaskEntity> findByUserDetails(Pageable pageable, UserEntity userEntity);
+
+    TaskEntity findByTaskId(String taskId);
 }

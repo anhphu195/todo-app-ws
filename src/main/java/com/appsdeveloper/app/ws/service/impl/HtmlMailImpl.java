@@ -32,6 +32,7 @@ public class HtmlMailImpl implements HtmlMail {
             helper.setTo(to);
             helper.setText(htmlMsg, true);
             mailSender.send(message);
+            System.out.println("Email sent!");
         } catch (MessagingException ex) {
             Logger.getLogger(HtmlMail.class.getName()).log(Level.SEVERE, null, ex);
         }

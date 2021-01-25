@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -40,6 +41,7 @@ public class TaskServiceImpl implements TaskService {
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setTaskId(utils.generateTaskId(30));
+        taskEntity.setDate(new Date());
         taskEntity.setTaskContent(taskContent);
         taskEntity.setUserDetails(userEntity);
         userEntity.getTasks().add(taskEntity);
@@ -65,5 +67,38 @@ public class TaskServiceImpl implements TaskService {
             returnValue.add(taskDto);
         }
         return returnValue;
+    }
+
+    @Override
+    public TaskDto updateTask(String userId, String taskId, TaskDto taskDto) {
+        UserEntity userEntity = userRepository.findByUserId(userId);
+        if (userEntity == null) throw new RuntimeException(ErrorMessages.NO_FOUND_USER.getErrorMessage());
+
+        TaskEntity taskEntity = taskRepository.findByTaskId(taskId);
+        if (userEntity == null) throw new RuntimeException(ErrorMessages.NO_FOUND_TASK.getErrorMessage());
+
+        if(taskEntity.getUserDetails() != userEntity) throw new RuntimeException(ErrorMessages.USER_DONT_HAVE_THIS_TASK.getErrorMessage());
+
+        taskEntity.setTaskContent(taskDto.getTaskContent());
+        taskEntity.setDate(new Date());
+
+        TaskEntity savedTask = taskRepository.save(taskEntity);
+
+        TaskDto returnValue = new TaskDto();
+        BeanUtils.copyProperties(savedTask,returnValue);
+
+        return returnValue;
+    }
+
+    @Override
+    public void deleteTask(String userId, String taskId) {
+        UserEntity userEntity = userRepository.findByUserId(userId);
+        if (userEntity == null) throw new RuntimeException(ErrorMessages.NO_FOUND_USER.getErrorMessage());
+
+        TaskEntity taskEntity = taskRepository.findByTaskId(taskId);
+        if (userEntity == null) throw new RuntimeException(ErrorMessages.NO_FOUND_TASK.getErrorMessage());
+
+        if(taskEntity.getUserDetails() != userEntity) throw new RuntimeException(ErrorMessages.USER_DONT_HAVE_THIS_TASK.getErrorMessage());
+        taskRepository.delete(taskEntity);
     }
 }

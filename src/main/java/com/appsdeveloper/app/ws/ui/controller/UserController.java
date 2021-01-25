@@ -200,7 +200,7 @@ public class UserController {
 
         return returnValue;
     }
-    @PutMapping(path = "/{userId}/addTask",
+    @PostMapping(path = "/{userId}/addTask",
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public TaskRest createTask(@PathVariable String userId, @RequestBody TaskRequestModel taskRequestModel) throws Exception {
@@ -211,7 +211,7 @@ public class UserController {
         return returnValue;
     }
 
-    @GetMapping(path = "/{userId}/task",
+    @GetMapping(path = "/{userId}/tasks",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public List<TaskRest> getUsers(@RequestParam(value = "page", defaultValue = "0") int page,
                                    @RequestParam(value = "limit", defaultValue = "2") int limit, @PathVariable String userId) {
@@ -224,4 +224,27 @@ public class UserController {
         }
         return returnValue;
     }
+
+    @PutMapping(path = "/{userId}/task/{taskId}",
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public TaskRest updateTask(@PathVariable String userId, @PathVariable String taskId, @RequestBody TaskRequestModel taskRequestModel) throws Exception {
+        ModelMapper modelMapper = new ModelMapper();
+        TaskDto taskDto = modelMapper.map(taskRequestModel,TaskDto.class);
+        TaskDto addedTask = taskService.updateTask(userId,taskId,taskDto);
+        TaskRest returnValue = modelMapper.map(addedTask,TaskRest.class);
+        return returnValue;
+    }
+
+    @DeleteMapping(path = "/{userId}/deleteTask/{taskId}",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public OperationStatusModel deleteTask(@PathVariable String userId,@PathVariable String taskId) {
+        OperationStatusModel returnValue = new OperationStatusModel();
+        returnValue.setOperationName(RequestOperationName.DELETE.name());
+        taskService.deleteTask(userId,taskId);
+        returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        return returnValue;
+    }
+
+
 }
