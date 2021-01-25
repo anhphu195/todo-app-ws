@@ -1,8 +1,11 @@
 package com.appsdeveloper.app.ws.service.impl;
 
+import com.appsdeveloper.app.ws.io.entity.PasswordResetTokenEntity;
 import com.appsdeveloper.app.ws.io.entity.TaskEntity;
+import com.appsdeveloper.app.ws.io.repositories.PasswordResetTokenRepository;
 import com.appsdeveloper.app.ws.io.repositories.UserRepository;
 import com.appsdeveloper.app.ws.io.entity.UserEntity;
+import com.appsdeveloper.app.ws.service.HtmlMail;
 import com.appsdeveloper.app.ws.service.UserService;
 import com.appsdeveloper.app.ws.shared.Utils;
 import com.appsdeveloper.app.ws.shared.dto.AddressDto;
@@ -34,6 +37,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Autowired
+    HtmlMail htmlMail;
 
     @Override
     public UserDto createUser(UserDto user) {
@@ -136,6 +145,64 @@ public class UserServiceImpl implements UserService {
                 returnValue = true;
             }
         }
+        return returnValue;
+    }
+
+    @Override
+    public boolean requestPasswordReset(String email) {
+        boolean returnValue = false;
+        UserEntity userEntity = userRepository.findByEmail(email);
+        if (userEntity == null) {
+            return returnValue;
+        }
+        String token = new Utils().generatePasswordResetToken(userEntity.getUserId());
+
+        PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenRepository.findByUserDetails(userEntity);
+        if (passwordResetTokenEntity == null){
+            passwordResetTokenEntity = new PasswordResetTokenEntity();
+        }
+        //PasswordResetTokenEntity passwordResetTokenEntity = new PasswordResetTokenEntity();
+
+        passwordResetTokenEntity.setToken(token);
+        passwordResetTokenEntity.setUserDetails(userEntity);
+        passwordResetTokenRepository.save(passwordResetTokenEntity);
+        String htmlMsg = "<h1>A request to reset your password</h1>"
+                + "<p>Hi "+userEntity.getLastName()+"</p><br/>"
+                +"<p>the password for your candidate profile has just recently been changed.</p><br/>"
+                +"<p>If you changed the password yourself, no further action on your part is required.</p><br/>"
+                +"<p>In case you are not aware of any password changes, your profile may have been compromised. To regain access, you can always reset the password.</p><br/>"
+                +"<a href='http://localhost:8080/verification-service/password-reset.html?token=" + token + "'> Reset Password </a><br/>"
+                +"<p>Thank you</p>";
+
+        htmlMail.sendMail(email,"Password-Reset!", htmlMsg);
+        returnValue = true;
+        return returnValue;
+    }
+
+    @Override
+    public boolean resetPassword(String token, String password) {
+        boolean returnValue = false;
+        if (Utils.hasTokenExpired(token)){
+            return returnValue;
+        }
+
+        PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenRepository.findByToken(token);
+
+        if(passwordResetTokenEntity == null){
+            return returnValue;
+        }
+
+        String encodedPassword = bCryptPasswordEncoder.encode(password);
+
+        UserEntity userEntity = passwordResetTokenEntity.getUserDetails();
+        userEntity.setEncrytedPassword(encodedPassword);
+        UserEntity savedUser = userRepository.save(userEntity);
+
+        if(savedUser != null && savedUser.getEncrytedPassword().equalsIgnoreCase(encodedPassword)){
+            returnValue = true;
+        }
+        passwordResetTokenRepository.delete(passwordResetTokenEntity);
+
         return returnValue;
     }
 

@@ -17,13 +17,11 @@ public class HtmlMailImpl implements HtmlMail {
         this.mailSender = mailSender;
     }
     @Override
-    public void sendMail(String from, String to, String subject, String token) {
+    public void sendMail(String to, String subject, String htmlMsg) {
         try {
+            String from = "anhphu19051996@gmail.com";
 
             MimeMessage message = mailSender.createMimeMessage();
-            String htmlMsg = "<h3>To confirm your account</h3>"
-                    +"<a href='http://localhost:8080/verification-service/email-veritification.html?token=" + token + "'> please click here </a><br/>"
-                    +"<p>Thank you</p>";
 
             message.setSubject(subject);
             MimeMessageHelper helper;
